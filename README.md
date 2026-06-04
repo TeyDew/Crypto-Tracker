@@ -1,6 +1,6 @@
 # Crypto Tracker
 
-Extension Chrome pour suivre tes cryptos en temps réel depuis la barre d'outils.
+Chrome extension to track your crypto prices right from the toolbar.
 
 <p align="center">
   <img src="screenshot.png" alt="Crypto Tracker preview" width="390"/>
@@ -8,26 +8,26 @@ Extension Chrome pour suivre tes cryptos en temps réel depuis la barre d'outils
 
 ---
 
-## Ce que ça fait
+## Features
 
-- Prix en direct dans l'icône de l'extension (badge mis à jour automatiquement)
-- Watchlist personnalisable — ajoute n'importe quelle crypto via la recherche CoinGecko
-- Graphique 24h avec survol pour voir le prix à chaque point
-- Suivi de portefeuille avec valeur totale calculée en temps réel
-- Alertes prix (au-dessus / en-dessous d'un seuil) avec notification système
-- Bascule USD / EUR instantanée
+- Live price in the extension icon badge, updated automatically
+- Custom watchlist — search and add any coin via CoinGecko
+- 24h chart with hover to inspect price at any point
+- Portfolio tracking with real-time total value
+- Price alerts (above / below a threshold) with system notifications
+- Instant USD / EUR toggle
 
 ## Installation
 
-> En attendant une éventuelle publication sur le Chrome Web Store.
+> Until a potential Chrome Web Store release.
 
-1. Clone ou télécharge ce repo
-2. Va sur `chrome://extensions`
-3. Active le **mode développeur** (en haut à droite)
-4. Clique sur **Charger l'extension non empaquetée** et sélectionne le dossier du projet
+1. Clone or download this repo
+2. Go to `chrome://extensions`
+3. Enable **Developer mode** (top right)
+4. Click **Load unpacked** and select the project folder
 
 ## Stack
 
-- Manifest V3 (service worker background)
-- [CoinGecko API](https://www.coingecko.com/en/api) — gratuit, sans clé API
-- Vanilla JS / Canvas 2D — aucune dépendance
+- Manifest V3 (background service worker)
+- [CoinGecko API](https://www.coingecko.com/en/api) — free, no API key needed
+- Vanilla JS / Canvas 2D — zero dependencies
