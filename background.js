@@ -1,3 +1,35 @@
+const API = 'https://api.coingecko.com/api/v3';
+
+async function fetchAndCachePrices() {
+  const { watchlist = ['bitcoin'] } = await chrome.storage.local.get('watchlist');
+  if (!watchlist.length) return;
+
+  const [usdMarkets, eurMarkets] = await Promise.all([
+    fetch(`${API}/coins/markets?vs_currency=usd&ids=${watchlist.join(',')}&order=market_cap_desc&per_page=50&sparkline=false&price_change_percentage=24h`).then(r => r.ok ? r.json() : []),
+    fetch(`${API}/coins/markets?vs_currency=eur&ids=${watchlist.join(',')}&order=market_cap_desc&per_page=50&sparkline=false&price_change_percentage=24h`).then(r => r.ok ? r.json() : []),
+  ]);
+
+  const { cachedCoins = {} } = await chrome.storage.local.get('cachedCoins');
+
+  const merge = (markets, cur) => {
+    markets.forEach(m => {
+      if (!cachedCoins[m.id]) cachedCoins[m.id] = {};
+      Object.assign(cachedCoins[m.id], {
+        name:  m.name,
+        symbol: m.symbol,
+        image:  m.image,
+        [cur]:                  m.current_price,
+        [`${cur}_24h_change`]:  m.price_change_percentage_24h,
+      });
+    });
+  };
+
+  merge(usdMarkets, 'usd');
+  merge(eurMarkets, 'eur');
+
+  await chrome.storage.local.set({ cachedCoins });
+}
+
 const CRYPTO_COLORS = {
   bitcoin: '#F7931A',
   ethereum: '#8A9FF0',
@@ -222,8 +254,13 @@ chrome.runtime.onInstalled.addListener(() => {
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === 'tick') {
-    await checkAlerts(); // must run first — sets badge if alerts fire
-    updateBadge();       // skips badge reset if triggeredAlerts is non-empty
+    try {
+      await fetchAndCachePrices();
+    } catch (err) {
+      console.error('background fetch error:', err);
+    }
+    await checkAlerts();
+    updateBadge();
   }
 });
 
