@@ -817,6 +817,77 @@ function initAlerts() {
   loadAlerts();
 }
 
+// ─── FEAR & GREED INDEX ──────────────────────────
+const FNG_API = 'https://api.alternative.me/fng/';
+const FNG_CACHE_TTL = 4 * 60 * 60 * 1000; // 4 hours
+
+function fngColor(v) {
+  if (v <= 24) return '#ef4444';
+  if (v <= 44) return '#f97316';
+  if (v <= 55) return '#eab308';
+  if (v <= 74) return '#84cc16';
+  return '#22c55e';
+}
+
+function renderFearGreed(data) {
+  if (!data || !data.length) return;
+  const cur = data[0];
+  const val = parseInt(cur.value, 10);
+  const c   = fngColor(val);
+
+  const thumb = document.getElementById('fngThumb');
+  thumb.style.left      = val + '%';
+  thumb.style.boxShadow = `0 0 0 2px #13131f, 0 0 0 3.5px ${c}`;
+
+  const valEl = document.getElementById('fngValue');
+  valEl.textContent = val;
+  valEl.style.color = c;
+  document.getElementById('fngLabel').textContent = cur.value_classification;
+
+  const hist = document.getElementById('fngHistory');
+  hist.innerHTML = '';
+  const days = data.slice(0, 7).reverse();
+  days.forEach((d, i) => {
+    const v   = parseInt(d.value, 10);
+    const ts  = parseInt(d.timestamp, 10) * 1000;
+    const day = new Date(ts).toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 2);
+    const isToday = i === days.length - 1;
+
+    const item = document.createElement('div');
+    item.className = 'fng-hist-item';
+    item.title = `${d.value_classification}: ${v}`;
+
+    const dot = document.createElement('div');
+    dot.className = 'fng-hist-dot' + (isToday ? ' fng-hist-today' : '');
+    dot.style.background = fngColor(v);
+
+    const lbl = document.createElement('span');
+    lbl.className = 'fng-hist-lbl';
+    lbl.textContent = day;
+
+    item.append(dot, lbl);
+    hist.appendChild(item);
+  });
+}
+
+async function loadFearGreed() {
+  const { fearGreedCache } = await chrome.storage.local.get('fearGreedCache');
+  if (fearGreedCache && Date.now() - fearGreedCache.ts < FNG_CACHE_TTL) {
+    renderFearGreed(fearGreedCache.data);
+    return;
+  }
+  try {
+    const res  = await fetch(`${FNG_API}?limit=7`);
+    const json = await res.json();
+    if (json.data?.length) {
+      await chrome.storage.local.set({ fearGreedCache: { data: json.data, ts: Date.now() } });
+      renderFearGreed(json.data);
+    }
+  } catch {
+    // silently fail — index updates once daily, stale cache is fine
+  }
+}
+
 // ─── REFRESH BUTTON ──────────────────────────────
 async function doRefresh() {
   const btn = document.getElementById('refreshBtn');
@@ -866,6 +937,7 @@ async function init() {
   // Fetch fresh data
   loadPrices();
   loadChart();
+  loadFearGreed();
 
   // React to triggered alerts fired by the background while popup is open
   chrome.storage.onChanged.addListener((changes) => {
