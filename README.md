@@ -16,6 +16,7 @@ Chrome extension to track your crypto prices right from the toolbar.
 - Portfolio tracking with real-time total value
 - Price alerts (above / below a threshold) with system notifications
 - Instant USD / EUR toggle
+- Fear & Greed Index with 7-day history (via [Alternative.me](https://alternative.me/crypto/fear-and-greed-index/))
 
 ## Installation
 
@@ -30,4 +31,5 @@ Chrome extension to track your crypto prices right from the toolbar.
 
 - Manifest V3 (background service worker)
 - [CoinGecko API](https://www.coingecko.com/en/api) — free, no API key needed
+- [Alternative.me API](https://alternative.me/crypto/fear-and-greed-index/) — Fear & Greed Index, cached 4h
 - Vanilla JS / Canvas 2D — zero dependencies
